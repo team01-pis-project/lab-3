@@ -1,0 +1,73 @@
+## IntelliJ IDEA ###
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+### Mac OS ###
+.DS_Store
+
+### Java ###
+*.class
+*.jar
+*.war
+*.ear
+*.log
+target/
+build/
+*.iml
+*.iws
+*.ipr
+.idea/
+.classpath
+.project
+.settings/
+
+### Maven ###
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/
+mvnw
+mvnw.cmd
+
+### Gradle ###
+.gradle/
+build/
+!gradle-wrapper.jar
+.gradletasknamecache
+
+### Logs ###
+logs/
+*.log
+
+### Application properties (секретные данные) ###
+application-production.properties
+application-dev.properties
+*.properties.local
+*.yml.local
