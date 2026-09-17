@@ -1,0 +1,48 @@
+name: Release (CD)
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Oracle OpenJDK 26
+        uses: oracle-actions/setup-java@v1
+        with:
+          website: oracle.com
+          release: 26
+
+      - name: Compile and package
+        run: |
+          mkdir -p out
+          find src -name "*.java" | xargs javac -d out -source 23 -target 23
+
+          cd out
+          # Берём первый найденный класс как Main-Class
+          MAIN_CLASS=$(find . -name "*.class" | head -1 | sed 's|./||;s|.class||;s|/|.|g')
+          echo "Main-Class: $MAIN_CLASS"
+          jar cfe ../lab-app.jar $MAIN_CLASS .
+          cd ..
+          ls -lh lab-app.jar
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.run_number }}
+          name: Release v${{ github.run_number }}
+          body: |
+            Автоматическая сборка
+            - Java 26 (Oracle OpenJDK)
+            - Успешная компиляция
+            - Артефакт: lab-app.jar
+          files: lab-app.jar
+          draft: false
+          prerelease: false
