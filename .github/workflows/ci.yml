@@ -1,0 +1,41 @@
+name: Java CI (OpenJDK 26)
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Oracle OpenJDK 26
+        uses: oracle-actions/setup-java@v1
+        with:
+          website: oracle.com
+          release: 26
+
+      - name: Verify Java version
+        run: |
+          java -version
+          javac -version
+
+      - name: Compile Java sources
+        run: |
+          mkdir -p out
+          find src -name "*.java" | xargs javac -d out -source 23 -target 23
+
+      - name: Check compilation result
+        run: |
+          echo "=== Скомпилированные классы ==="
+          find out -name "*.class" || true
+          if [ -z "$(find out -name '*.class' 2>/dev/null)" ]; then
+            echo "Ошибка: ни один класс не скомпилировался!"
+            exit 1
+          fi
+          echo "Компиляция прошла успешно"
