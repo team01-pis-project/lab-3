@@ -135,7 +135,7 @@ public class HalsteadMetrics {
             sumTerm += b / c;
         }
 
-        // Вычиляем новый рейтинг
+        // Вычисляем новый рейтинг
         double delta = sumV - sumTerm;
         double Rnew = R0 * (1.0 + 1e-3 * delta);
 
