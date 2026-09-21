@@ -1,11 +1,29 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 //Лабораторная работа №3. Метрики Холстеда.
 
 public class HalsteadMetrics {
 
+    // Хранилище параметров, прочитанных из файла
+    private static Map<String, String> data = new HashMap<>();
+
     public static void main(String[] args) {
         Locale.setDefault(Locale.US); // для точки в качестве десятичного разделителя
+
+        // Имя файла из аргумента или по умолчанию
+        String fileName = (args.length > 0) ? args[0] : "halstead_data.txt";
+
+        // Загрузка всех параметров из файла
+        if (!loadData(fileName)) {
+            System.err.println("Не удалось загрузить данные из файла: " + fileName);
+            return;
+        }
+        System.out.println("Данные загружены из файла: " + fileName);
 
         System.out.println("========== ЗАДАНИЕ №1 ==========");
         task1();
@@ -17,15 +35,60 @@ public class HalsteadMetrics {
         task3();
     }
 
+    // Чтение файла вида ключ=значение
+    private static boolean loadData(String fileName) {
+        try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                // пропускаем пустые строки и комментарии
+                if (line.isEmpty() || line.startsWith("#")) {
+                    continue;
+                }
+                int eq = line.indexOf('=');
+                if (eq > 0) {
+                    String key = line.substring(0, eq).trim();
+                    String value = line.substring(eq + 1).trim();
+                    data.put(key, value);
+                }
+            }
+            return true;
+        } catch (IOException e) {
+            System.err.println("Ошибка чтения файла: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // Удобное чтение числа из map
+    private static double getDouble(String key) {
+        return Double.parseDouble(data.get(key).replace(',', '.'));
+    }
+
+    // Чтение целого числа
+    private static int getInt(String key) {
+        return (int) Math.round(getDouble(key));
+    }
+
+    // Разбор списка чисел "5,7,9,11"
+    private static double[] getDoubleArray(String key) {
+        String[] parts = data.get(key).split("[,\\s]+");
+        double[] arr = new double[parts.length];
+        for (int i = 0; i < parts.length; i++) {
+            arr[i] = Double.parseDouble(parts[i].replace(',', '.'));
+        }
+        return arr;
+    }
+
 
     // ЗАДАНИЕ №1: расчет потенциального числа ошибок по V* и λ
 
     private static void task1() {
-        //Задаем входные данные
-        int targets   = 20;   // число одновременно сопровождаемых целей
-        int measure   = 30;   // количество измерений каждого параметра
-        int params    = 10;   // количество отслеживаемых параметров
-        int calcParams = 3;   // количество рассчитываемых параметров по каждой цели
+        // Данные из файла
+        int targets   = getInt("targets");   // число одновременно сопровождаемых целей
+        int measure   = getInt("measure");   // количество измерений каждого параметра
+        int params    = getInt("params");   // количество отслеживаемых параметров
+        int calcParams = getInt("calcParams");   // количество рассчитываемых параметров по каждой цели
+        double lambda  = getDouble("lambda");
 
         // n2* – минимальное число различных операндов (n2*=входные+выходные данные)
         double n2star = targets * params * measure + targets * calcParams;
@@ -35,9 +98,6 @@ public class HalsteadMetrics {
         double Vstar = (n2star + 2) * log2(n2star + 2);
         System.out.printf("Потенциальный объем программы: V*  = %.2f%n", Vstar);
 
-        // Уровень языка программирования
-        double lambda = 1.53;
-
         // Рассчитываем потенциальное число ошибок
         double B = (Vstar * Vstar) / (3000.0 * lambda);
         System.out.printf("Потенциальное число ошибок: B   = %.0f %n", B);
@@ -46,8 +106,15 @@ public class HalsteadMetrics {
     // ЗАДАНИЕ №2: расчет структурных параметров, объёма, трудозатрат, надёжности
 
     private static void task2() {
+
+        //  n2* и прочие параметры из файла
+        int targets    = getInt("targets");
+        int measure    = getInt("measure");
+        int params     = getInt("params");
+        int calcParams = getInt("calcParams");
+
         // Входные данные из задания № 1
-        double n2star = 20 * 10 * 30 + 20 * 3;
+        double n2star = targets * params * measure + targets * calcParams;
 
         // Рассчитываем число модулей
         double k = n2star / 8.0;
@@ -97,12 +164,12 @@ public class HalsteadMetrics {
     // ЗАДАНИЕ №3: рейтинг программиста и ожидаемое число ошибок
 
     private static void task3() {
-        //Задаем входные данные
-        double R0 = 1000.0;          // начальный рейтинг
-        double lambda = 1.53;        // уровень языка
-        double[] Vj = {5, 7, 9, 11}; // объёмы написанных программ (Кбайт)
-        double[] Bk = {0, 2, 5, 4};  // количество ошибок в соответствующих программах
-        double Vnext = 15.0;         // объём будущей программы
+        //Задаем входные данные из файла
+        double R0 = getDouble("R0");            // начальный рейтинг
+        double lambda = getDouble("lambda");    // уровень языка
+        double[] Vj = getDoubleArray("Vj");     // объёмы написанных программ (Кбайт)
+        double[] Bk = getDoubleArray("Bk");     // количество ошибок в соответствующих программах
+        double Vnext = getDouble("Vnext");      // объём будущей программы
 
         System.out.println("Проверяем три варианта коэффициента c(λ, R):");
 
