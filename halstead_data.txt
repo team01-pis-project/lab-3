@@ -1,0 +1,17 @@
+# Задание 1–2: параметры БКС
+targets=20
+measure=30
+params=10
+calcParams=3
+lambda=1.53
+
+# Задание 2: бригада
+programmers=10
+productivity=20
+hoursPerDay=8
+
+# Задание 3: рейтинг программиста
+R0=1000
+Vj=5,7,9,11
+Bk=0,2,5,4
+Vnext=15
